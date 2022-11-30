@@ -1,6 +1,6 @@
 # get-lasered
 
-Get laseres is an FPS shooter game, right now it looks more like a technical demo ;O
+Get laseres is an FPS shooter game, right now it looks more like a technical demo ;p but it will get better overtime
 
 Using threejs library with webpack to run the game in a server with all the dependencies packed in the node_modules
 
