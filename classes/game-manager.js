@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { FPSCamera } from "./fps-camera";
 import threeFbxLoader, * as FBXLoader from 'three-fbx-loader'
-import { Bullet } from './bullet';
 
 export class GameManager {
     constructor() {
@@ -428,12 +427,6 @@ export class GameManager {
                 case "Space":
                     let blasterfx = this.soundFX.blasterSound
                     blasterfx.play();
-                    let newBullet = new Bullet(this.objectsInScene.bullet);
-                    newBullet.alive = true;
-                    setTimeout(function () {
-                        newBullet.alive = false;
-                        // blasterfx.stop();
-                    }, 1000)
                     this.objectsInScene.bullet.position.copy(this.objectsInScene.player.position);
 
                     let xAxis = new THREE.Vector3();
