@@ -1,4 +1,8 @@
 
+/*
+    This class was made with the purpose of managing user inputs with listeners
+    using key codes constants to evaluate key press
+*/
 export class InputIOController {
     constructor(target) {
         this.target_ = target || document;

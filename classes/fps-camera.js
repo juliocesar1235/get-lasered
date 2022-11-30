@@ -3,8 +3,12 @@ import { KEYS } from '../constants';
 import { clamp } from '../helpers/math-helper';
 import { InputIOController } from "./input-io-controller";
 
+/*
+    Here is my implementation of an FPS camera which emulates the one given by Threejs library but more customizable
+*/
 export class FPSCamera {
     constructor(camera, objects) {
+        // Initialize all properties of the camera with the IO class which helps to listen for user inputs
         this.camera_ = camera;
         this.input_ = new InputIOController();
         this.rotation_ = new THREE.Quaternion();
@@ -13,8 +17,8 @@ export class FPSCamera {
         this.phiSpeed_ = 8;
         this.theta_ = 0;
         this.thetaSpeed_ = 5;
-        this.headBobActive_ = false;
-        this.headBobTimer_ = 0;
+        // this.headBobActive_ = false;
+        // this.headBobTimer_ = 0;
         this.objects_ = objects;
     }
 
@@ -22,15 +26,13 @@ export class FPSCamera {
         this.updateRotation_(timeElapsed);
         this.updateCamera_(timeElapsed);
         this.updateTranslation_(timeElapsed);
-        // this.updateHeadBob_(timeElapsed);
         this.input_.update(timeElapsed);
     }
 
+    // In hear i update the camera using the rotation and translation of the instance which is affected by the user input
     updateCamera_(_) {
         this.camera_.quaternion.copy(this.rotation_);
         this.camera_.position.copy(this.translation_);
-        // this.camera_.position.y += Math.sin(this.headBobTimer_ * 10) * 1.5;
-
         const forward = new THREE.Vector3(0, 0, -1);
         forward.applyQuaternion(this.rotation_);
 
@@ -52,19 +54,7 @@ export class FPSCamera {
         this.camera_.lookAt(closest);
     }
 
-    // updateHeadBob_(timeElapsed) {
-    //     if (this.headBobActive_) {
-    //         const wavelength = Math.PI;
-    //         const nextStep = 1 + Math.floor(((this.headBobTimer_ + 0.000001) * 10) / wavelength);
-    //         const nextStepTime = nextStep * wavelength / 10;
-    //         this.headBobTimer_ = Math.min(this.headBobTimer_ + timeElapsed, nextStepTime);
-
-    //         if (this.headBobTimer_ == nextStepTime) {
-    //             this.headBobActive_ = false;
-    //         }
-    //     }
-    // }
-
+    // I use this update translation to perform the movement of the camera and adjust the speed forward and on the sides
     updateTranslation_(timeElapsed) {
         const forwardVelocity = (this.input_.key(KEYS.w) ? 1 : 0) + (this.input_.key(KEYS.s) ? -1 : 0);
         const strafeVelocity = (this.input_.key(KEYS.a) ? 1 : 0) + (this.input_.key(KEYS.d) ? -1 : 0);
@@ -83,9 +73,6 @@ export class FPSCamera {
         this.translation_.add(forward);
         this.translation_.add(left);
 
-        // if (forwardVelocity != 0 || strafeVelocity != 0) {
-        //     this.headBobActive_ = true;
-        // }
     }
 
     updateRotation_(timeElapsed) {

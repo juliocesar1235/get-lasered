@@ -2,10 +2,16 @@ import * as THREE from 'three'
 import { FPSCamera } from "./fps-camera";
 import threeFbxLoader, * as FBXLoader from 'three-fbx-loader'
 
+/*
+    Here lies the heart of the game, basically all the instances need to start and run the game
+    is manage in here. The initialization of the whole scene, lighting, postfx, and update frame
+    is perform here.
+ */
 export class GameManager {
     constructor() {
         this.initialize_();
     }
+    // Initialization of scene includes map, meshes with textures, lighting, postfx such as sounds, and the fps camera 
     initialize_() {
         this.objectsInScene = {};
         this.soundFX = {};
@@ -20,11 +26,11 @@ export class GameManager {
         this.raf_();
         this.onWindowResize_();
     }
-
+    // here we initialize the custom fps camera 
     initializeGame_() {
         this.fpsCamera_ = new FPSCamera(this.camera_, this.objects_);
     }
-
+    // here the three js instance with the perspective camera and append it to the DOM
     initializeRenderer_() {
         this.threejs_ = new THREE.WebGL1Renderer({
             antialias: false,
@@ -56,6 +62,7 @@ export class GameManager {
         this.uiScene_ = new THREE.Scene();
     }
 
+    // Here we initialize the scene with the skybox, plane and objects with its corresponding textures
     initializeScene_() {
         const loader = new THREE.CubeTextureLoader();
 
@@ -282,7 +289,7 @@ export class GameManager {
         this.uiScene_.add(this.sprite_);
 
     }
-
+    // here we initialize the lighting of the game, using a spotlight and a hemisphere light
     initializeLights_() {
         // const gui = new dat.GUI();
         const distance = 50.0;
@@ -314,6 +321,8 @@ export class GameManager {
         this.scene_.add(light);
     }
 
+    // I use these helper function for texture loading, metallic, albedo, normal and roughness
+    // Used free textures from https://freepbr.com/ 
     loadMaterial_(name, tiling) {
         const mapLoader = new THREE.TextureLoader();
         const maxAnisotropy = this.threejs_.capabilities.getMaxAnisotropy();
@@ -354,6 +363,7 @@ export class GameManager {
 
     }
 
+    // I use this function to load the audio files for sound fx
     initializePostFX_() {
         let enableSound = false;
         const listener = new THREE.AudioListener();
@@ -375,6 +385,7 @@ export class GameManager {
             blasterSound.setBuffer(buffer);
             blasterSound.setVolume(0.4);
         })
+        // this part needs more work since its a bit clonky when we have two audios running simultaniously
         this.soundFX.blasterSound = blasterSound;
         window.addEventListener('mousemove', (e) => {
             if (enableSound) {
@@ -395,6 +406,7 @@ export class GameManager {
         this.threejs_.setSize(window.innerWidth, window.innerHeight);
     }
 
+    // This is a recursive function
     raf_() {
         requestAnimationFrame((f) => {
             if (this.previousRAF_ === null) {
@@ -419,7 +431,8 @@ export class GameManager {
             this.raf_();
         });
     }
-
+    // stepper function to calculate elapsed time and check for space key press in order to shoot bullet
+    // Also added collition reviewer for the player and bullet object
     step_(timeElapsed) {
         const timeElapsedS = timeElapsed * 0.001;
         window.addEventListener('keydown', (e) => {
@@ -440,11 +453,13 @@ export class GameManager {
                     break;
             }
         })
-
+        /*
+            These to pieces of code are to review any collisions in the positions of the objects
+        */
+        // This part is to check for collisions for the player
         let meshGeo = this.objectsInScene.player.geometry.getAttribute('position');
         const vertx = new THREE.Vector3();
         let originPoint = this.objectsInScene.player.position.clone();
-        // console.log(meshGeo, 'Player vertex')
 
         for (let vertexIndex = 0; vertexIndex < meshGeo.count; vertexIndex++) {
             let localVertex = vertx.fromBufferAttribute(meshGeo, vertexIndex);
@@ -456,6 +471,8 @@ export class GameManager {
                 console.log('player collision hit')
             }
         }
+
+        // this part is to check for collisions for the bullet 
         let bulletGeo = this.objectsInScene.bullet.geometry.getAttribute('position');
         const bVertx = new THREE.Vector3();
         let bOriginPoint = this.objectsInScene.bullet.position.clone();
@@ -474,6 +491,8 @@ export class GameManager {
         this.fpsCamera_.update(timeElapsedS);
     }
 
+    // This function is intended to check where the player object is at with a raycaster and change the position for the enemy
+    // Also need more work because it has a weird behaivor, sometimes it follows sometimes not
     checkForPlayer_() {
         this.objectsInScene.enemy.searcharr.forEach((direction) => {
             this.objectsInScene.enemy.raycaster.set(this.objectsInScene.enemy.position, direction, 0, 50);
